@@ -1,12 +1,8 @@
 # Copyright (c) 2019-2021, NVIDIA CORPORATION. All rights reserved.
 # See file LICENSE for terms.
 
-import multiprocessing as mp
-
 from ucp._libs import ucx_api
 from ucp._libs.arr import Array
-
-mp = mp.get_context("spawn")
 
 
 def blocking_handler(request, exception, finished):
