@@ -4,7 +4,7 @@
 import asyncio
 import hashlib
 import logging
-import multiprocessing as mp
+import multiprocessing
 import os
 import socket
 import time
@@ -12,8 +12,6 @@ import time
 import numpy as np
 
 from ._libs import ucx_api
-
-mp = mp.get_context("spawn")
 
 
 def get_ucxpy_logger():
@@ -98,7 +96,12 @@ def _worker_process(
 
 
 def run_on_local_network(
-    n_workers, worker_func, worker_args=None, server_address=None, ucx_options_list=None
+    n_workers,
+    worker_func,
+    worker_args=None,
+    server_address=None,
+    ucx_options_list=None,
+    mp_context_type="spawn",
 ):
     """
     Creates a local UCX network of `n_workers` that runs `worker_func`
@@ -119,13 +122,15 @@ def run_on_local_network(
         Server address for the workers. If None, ucx_api.get_address() is used.
     ucx_options_list: list of dict
         Options to pass to UCX when initializing workers, one for each worker.
-
+    mp_context_type: str
+        Type of multiprocessing context to create (one of `"spawn"`,
+        `"fork"`, `"forkserver"`).
     Returns
     -------
     results : list
         The output of `worker_func` for each worker (sorted by rank)
     """
-
+    mp = multiprocessing.get_context(mp_context_type)
     if server_address is None:
         server_address = ucx_api.get_address()
     process_list = []
