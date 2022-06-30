@@ -23,7 +23,7 @@ import os
 from threading import Lock
 from time import perf_counter as clock
 
-from dask.utils import format_bytes, parse_bytes
+from dask.utils import format_bytes, format_time, parse_bytes
 
 import ucp
 from ucp._libs import ucx_api
@@ -335,8 +335,12 @@ def client(queue, port, server_address, args):
         print(f"Device(s)       | {args.server_dev}, {args.client_dev}")
     avg = format_bytes(2 * args.n_iter * args.n_bytes / sum(times))
     med = format_bytes(2 * args.n_bytes / np.median(times))
+    avg_latency = format_time(sum(times) / (2 * args.n_iter))
+    med_latency = format_time(np.median(times) / 2)
     print(f"Average         | {avg}/s")
     print(f"Median          | {med}/s")
+    print(f"Average latency | {avg_latency}")
+    print(f"Median latency  | {med_latency}")
     if not args.no_detailed_report:
         print("--------------------------")
         print("Iterations")
@@ -344,7 +348,8 @@ def client(queue, port, server_address, args):
         for i, t in enumerate(times):
             ts = format_bytes(2 * args.n_bytes / t)
             ts = (" " * (9 - len(ts))) + ts
-            print("%03d         |%s/s" % (i, ts))
+            latency = format_time(t / 2)
+            print("%03d         |%s/s [%s]" % (i, ts, latency))
 
 
 def parse_args():
